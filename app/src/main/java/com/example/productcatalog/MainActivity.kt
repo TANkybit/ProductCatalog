@@ -11,9 +11,14 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.Lifecycle
 import com.example.productcatalog.viewmodel.ProductListViewModel
 import kotlinx.coroutines.launch
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.example.productcatalog.ui.adapter.ProductAdapter
 
 class MainActivity : AppCompatActivity() {
     private val viewModel: ProductListViewModel by viewModels()
+
+    private lateinit var productAdapter: ProductAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,15 +30,23 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
+        val recyclerProducts =
+            findViewById<RecyclerView>(R.id.recyclerProducts)
+
+        productAdapter = ProductAdapter(emptyList())
+
+        recyclerProducts.layoutManager =
+            LinearLayoutManager(this)
+
+        recyclerProducts.adapter = productAdapter
+
         lifecycleScope.launch {
 
             repeatOnLifecycle(Lifecycle.State.STARTED) {
 
                 viewModel.products.collect { products ->
 
-                    products.forEach { product ->
-                        println("${product.id} - ${product.title}")
-                    }
+                    productAdapter.updateProducts(products)
                 }
             }
         }
