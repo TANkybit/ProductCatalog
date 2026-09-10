@@ -9,11 +9,17 @@ import androidx.activity.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.Lifecycle
-import com.example.productcatalog.viewmodel.ProductListViewModel
 import kotlinx.coroutines.launch
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.productcatalog.ui.adapter.ProductAdapter
+import com.example.productcatalog.viewmodel.ProductListViewModel
+import android.view.View
+import android.widget.Button
+import android.widget.LinearLayout
+import android.widget.ProgressBar
+import android.widget.TextView
+import com.example.productcatalog.viewmodel.ProductUiState
 
 class MainActivity : AppCompatActivity() {
     private val viewModel: ProductListViewModel by viewModels()
@@ -40,17 +46,61 @@ class MainActivity : AppCompatActivity() {
 
         recyclerProducts.adapter = productAdapter
 
+        val progressBar =
+            findViewById<ProgressBar>(R.id.progressBar)
+
+        val txtEmpty =
+            findViewById<TextView>(R.id.txtEmpty)
+
+        val errorLayout =
+            findViewById<LinearLayout>(R.id.errorLayout)
+
+        val txtError =
+            findViewById<TextView>(R.id.txtError)
+
+        val btnRetry =
+            findViewById<Button>(R.id.btnRetry)
+
         lifecycleScope.launch {
 
             repeatOnLifecycle(Lifecycle.State.STARTED) {
 
-                viewModel.products.collect { products ->
+                viewModel.uiState.collect { state ->
 
-                    productAdapter.updateProducts(products)
+                    recyclerProducts.visibility = View.GONE
+                    progressBar.visibility = View.GONE
+                    txtEmpty.visibility = View.GONE
+                    errorLayout.visibility = View.GONE
+
+                    when (state) {
+
+                        is ProductUiState.Loading -> {
+                            progressBar.visibility = View.VISIBLE
+                        }
+
+                        is ProductUiState.Success -> {
+                            recyclerProducts.visibility = View.VISIBLE
+                            productAdapter.updateProducts(state.products)
+                        }
+
+                        is ProductUiState.Empty -> {
+                            txtEmpty.visibility = View.VISIBLE
+                        }
+
+                        is ProductUiState.Error -> {
+                            errorLayout.visibility = View.VISIBLE
+                            txtError.text = state.message
+                        }
+                    }
                 }
             }
         }
 
         viewModel.loadProducts()
+
+        btnRetry.setOnClickListener {
+            viewModel.loadProducts()
+        }
     }
+
 }

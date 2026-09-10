@@ -4,7 +4,7 @@ import com.example.productcatalog.data.model.ProductResponse
 import retrofit2.http.GET
 import retrofit2.http.Query
 
-interface ProductAPI {
+interface ProductApi {
 
     @GET("products")
     suspend fun getProducts(

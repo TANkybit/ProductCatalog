@@ -12,25 +12,36 @@ import kotlinx.coroutines.launch
 class ProductListViewModel : ViewModel() {
     private val repository = ProductRepository()
 
-    private val _products = MutableStateFlow<List<Product>>(emptyList())
+    private val _uiState =
+        MutableStateFlow<ProductUiState>(ProductUiState.Loading)
 
-    val products: StateFlow<List<Product>> =
-        _products.asStateFlow()
+    val uiState: StateFlow<ProductUiState> =
+        _uiState.asStateFlow()
 
     fun loadProducts() {
 
         viewModelScope.launch {
+
+            _uiState.value = ProductUiState.Loading
 
             try {
 
                 val response =
                     repository.getProducts(20, 0)
 
-                _products.value = response.products
+                if (response.products.isEmpty()) {
+                    _uiState.value = ProductUiState.Empty
+                } else {
+                    _uiState.value =
+                        ProductUiState.Success(response.products)
+                }
 
             } catch (e: Exception) {
 
-                e.printStackTrace()
+                _uiState.value =
+                    ProductUiState.Error(
+                        e.message ?: "Something went wrong"
+                    )
             }
         }
     }

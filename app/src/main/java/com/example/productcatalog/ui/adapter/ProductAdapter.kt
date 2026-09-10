@@ -7,10 +7,15 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.productcatalog.R
 import com.example.productcatalog.data.model.Product
+import android.widget.ImageView
+import coil3.load
 
-class ProductAdapter(private var products: List<Product>) : RecyclerView.Adapter<ProductAdapter.ProductViewHolder>(){
+class ProductAdapter (private var products: List<Product>) : RecyclerView.Adapter<ProductAdapter.ProductViewHolder>(){
     class ProductViewHolder(itemView: View) :
         RecyclerView.ViewHolder(itemView) {
+
+        val image: ImageView =
+            itemView.findViewById(R.id.imgProduct)
 
         val title: TextView =
             itemView.findViewById(R.id.txtProductTitle)
@@ -40,6 +45,7 @@ class ProductAdapter(private var products: List<Product>) : RecyclerView.Adapter
 
         holder.title.text = product.title
         holder.price.text = "$${product.price}"
+        holder.image.load(product.thumbnail)
     }
 
     override fun getItemCount(): Int {
