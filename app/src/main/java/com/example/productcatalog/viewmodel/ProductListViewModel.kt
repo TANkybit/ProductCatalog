@@ -18,7 +18,17 @@ class ProductListViewModel : ViewModel() {
     val uiState: StateFlow<ProductUiState> =
         _uiState.asStateFlow()
 
+    private val allProducts = mutableListOf<Product>()
+
+    private var totalProducts = Int.MAX_VALUE
+
+    private var isLoading = false
+
     fun loadProducts() {
+
+        if (isLoading) return
+
+        isLoading = true
 
         viewModelScope.launch {
 
@@ -26,14 +36,21 @@ class ProductListViewModel : ViewModel() {
 
             try {
 
-                val response =
-                    repository.getProducts(20, 0)
+                val response = repository.getProducts(20, 0)
 
-                if (response.products.isEmpty()) {
+                allProducts.clear()
+                allProducts.addAll(response.products)
+
+                totalProducts = response.total
+
+                if (allProducts.isEmpty()) {
+
                     _uiState.value = ProductUiState.Empty
+
                 } else {
+
                     _uiState.value =
-                        ProductUiState.Success(response.products)
+                        ProductUiState.Success(allProducts.toList())
                 }
 
             } catch (e: Exception) {
@@ -42,6 +59,48 @@ class ProductListViewModel : ViewModel() {
                     ProductUiState.Error(
                         e.message ?: "Something went wrong"
                     )
+
+            } finally {
+
+                isLoading = false
+            }
+        }
+    }
+
+    fun loadNextPage() {
+
+        if (isLoading) return
+
+        if (allProducts.size >= totalProducts) return
+
+        isLoading = true
+
+        viewModelScope.launch {
+
+            try {
+
+                val response =
+                    repository.getProducts(
+                        20,
+                        allProducts.size
+                    )
+
+                allProducts.addAll(response.products)
+
+                totalProducts = response.total
+
+                _uiState.value =
+                    ProductUiState.Success(
+                        allProducts.toList()
+                    )
+
+            } catch (e: Exception) {
+
+                e.printStackTrace()
+
+            } finally {
+
+                isLoading = false
             }
         }
     }

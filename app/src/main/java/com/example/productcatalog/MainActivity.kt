@@ -81,6 +81,8 @@ class MainActivity : AppCompatActivity() {
                         is ProductUiState.Success -> {
                             recyclerProducts.visibility = View.VISIBLE
                             productAdapter.updateProducts(state.products)
+
+
                         }
 
                         is ProductUiState.Empty -> {
@@ -101,6 +103,42 @@ class MainActivity : AppCompatActivity() {
         btnRetry.setOnClickListener {
             viewModel.loadProducts()
         }
+
+        recyclerProducts.addOnScrollListener(
+            object : RecyclerView.OnScrollListener() {
+
+                override fun onScrolled(
+                    recyclerView: RecyclerView,
+                    dx: Int,
+                    dy: Int
+                ) {
+
+                    super.onScrolled(recyclerView, dx, dy)
+
+                    val layoutManager =
+                        recyclerView.layoutManager
+                                as LinearLayoutManager
+
+                    val visibleItemCount =
+                        layoutManager.childCount
+
+                    val totalItemCount =
+                        layoutManager.itemCount
+
+                    val firstVisibleItemPosition =
+                        layoutManager.findFirstVisibleItemPosition()
+
+                    if (
+                        visibleItemCount +
+                        firstVisibleItemPosition
+                        >= totalItemCount - 3
+                    ) {
+
+                        viewModel.loadNextPage()
+                    }
+                }
+            }
+        )
     }
 
 }
