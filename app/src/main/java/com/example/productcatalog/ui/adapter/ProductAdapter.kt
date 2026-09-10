@@ -45,7 +45,17 @@ class ProductAdapter (private var products: List<Product>, private val onProduct
 
         holder.title.text = product.title
         holder.price.text = "$${product.price}"
-        holder.image.load(product.thumbnail)
+
+        holder.image.setImageResource(R.drawable.ic_image_placeholder)
+
+        holder.image.load(product.thumbnail) {
+            listener(
+                onError = { _, _ ->
+                    holder.image.setImageResource(R.drawable.ic_broken_image)
+                }
+            )
+        }
+
         holder.itemView.setOnClickListener {
             onProductClick(product)
         }

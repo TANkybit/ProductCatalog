@@ -15,7 +15,7 @@ import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
-
+import coil3.load
 class ProductDetailActivity : AppCompatActivity() {
     private val viewModel: ProductDetailViewModel by viewModels()
 
@@ -63,10 +63,17 @@ class ProductDetailActivity : AppCompatActivity() {
                         txtDescription.text =
                             product.description
 
+                        imgDetail.setImageResource(R.drawable.ic_image_placeholder)
+
                         imgDetail.load(
-                            product.images.firstOrNull()
-                                ?: product.thumbnail
-                        )
+                            product.images.firstOrNull() ?: product.thumbnail
+                        ) {
+                            listener(
+                                onError = { _, _ ->
+                                    imgDetail.setImageResource(R.drawable.ic_broken_image)
+                                }
+                            )
+                        }
                     }
                 }
             }

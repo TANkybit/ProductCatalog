@@ -25,6 +25,7 @@ import com.example.productcatalog.ui.productdetail.ProductDetailActivity
 import android.text.Editable
 import android.text.TextWatcher
 import android.widget.EditText
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 
 class MainActivity : AppCompatActivity() {
     private val viewModel: ProductListViewModel by viewModels()
@@ -83,11 +84,18 @@ class MainActivity : AppCompatActivity() {
         val edtSearch =
             findViewById<EditText>(R.id.edtSearch)
 
+        val swipeRefresh =
+            findViewById<SwipeRefreshLayout>(R.id.swipeRefresh)
+
         lifecycleScope.launch {
 
             repeatOnLifecycle(Lifecycle.State.STARTED) {
 
                 viewModel.uiState.collect { state ->
+
+                    if (state !is ProductUiState.Loading) {
+                        swipeRefresh.isRefreshing = false
+                    }
 
                     recyclerProducts.visibility = View.GONE
                     progressBar.visibility = View.GONE
@@ -190,6 +198,15 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         )
+
+        swipeRefresh.setOnRefreshListener {
+
+            if (edtSearch.text.isNotEmpty()) {
+                edtSearch.text.clear()
+            } else {
+                viewModel.loadProducts()
+            }
+        }
     }
 
 }
