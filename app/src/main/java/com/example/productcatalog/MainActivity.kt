@@ -22,6 +22,9 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import com.example.productcatalog.viewmodel.ProductUiState
 import com.example.productcatalog.ui.productdetail.ProductDetailActivity
+import android.text.Editable
+import android.text.TextWatcher
+import android.widget.EditText
 
 class MainActivity : AppCompatActivity() {
     private val viewModel: ProductListViewModel by viewModels()
@@ -76,6 +79,9 @@ class MainActivity : AppCompatActivity() {
 
         val btnRetry =
             findViewById<Button>(R.id.btnRetry)
+
+        val edtSearch =
+            findViewById<EditText>(R.id.edtSearch)
 
         lifecycleScope.launch {
 
@@ -152,6 +158,35 @@ class MainActivity : AppCompatActivity() {
 
                         viewModel.loadNextPage()
                     }
+                }
+            }
+        )
+
+        edtSearch.addTextChangedListener(
+            object : TextWatcher {
+
+                override fun beforeTextChanged(
+                    s: CharSequence?,
+                    start: Int,
+                    count: Int,
+                    after: Int
+                ) {
+                }
+
+                override fun onTextChanged(
+                    s: CharSequence?,
+                    start: Int,
+                    before: Int,
+                    count: Int
+                ) {
+                    viewModel.searchProducts(
+                        s.toString()
+                    )
+                }
+
+                override fun afterTextChanged(
+                    s: Editable?
+                ) {
                 }
             }
         )

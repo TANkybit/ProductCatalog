@@ -15,4 +15,8 @@ class ProductRepository {
     suspend fun getProduct(id: Int): Product {
         return RetrofitClient.api.getProduct(id)
     }
+
+    suspend fun searchProducts(query: String): ProductResponse {
+        return RetrofitClient.api.searchProducts(query)
+    }
 }

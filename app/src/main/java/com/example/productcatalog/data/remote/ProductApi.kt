@@ -18,4 +18,9 @@ interface ProductApi {
     suspend fun getProduct(
         @Path("id") id: Int
     ): Product
+
+    @GET("products/search")
+    suspend fun searchProducts(
+        @Query("q") query: String
+    ): ProductResponse
 }

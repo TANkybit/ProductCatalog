@@ -8,6 +8,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.CancellationException
 
 class ProductListViewModel : ViewModel() {
     private val repository = ProductRepository()
@@ -24,7 +27,13 @@ class ProductListViewModel : ViewModel() {
 
     private var isLoading = false
 
+    private var searchJob: Job? = null
+
+    private var isSearching = false
+
     fun loadProducts() {
+
+        isSearching = false
 
         if (isLoading) return
 
@@ -71,6 +80,8 @@ class ProductListViewModel : ViewModel() {
 
         if (isLoading) return
 
+        if (isSearching) return
+
         if (allProducts.size >= totalProducts) return
 
         isLoading = true
@@ -101,6 +112,62 @@ class ProductListViewModel : ViewModel() {
             } finally {
 
                 isLoading = false
+            }
+        }
+    }
+
+    fun searchProducts(query: String) {
+        isSearching = query.isNotBlank()
+
+        searchJob?.cancel()
+
+        searchJob = viewModelScope.launch {
+
+            delay(200)
+
+            if (query.isBlank()) {
+                loadProducts()
+                return@launch
+            }
+
+            _uiState.value = ProductUiState.Loading
+
+            try {
+
+                val response =
+                    repository.searchProducts(query)
+
+                val sortedProducts =
+                    response.products.sortedByDescending { product ->
+                        product.title.contains(
+                            query,
+                            ignoreCase = true
+                        )
+                    }
+
+                if (response.products.isEmpty()) {
+
+                    _uiState.value =
+                        ProductUiState.Empty
+
+                } else {
+
+                    _uiState.value =
+                        ProductUiState.Success(
+                            sortedProducts
+                        )
+                }
+
+            } catch (e: CancellationException) {
+
+                throw e
+
+            } catch (e: Exception) {
+
+                _uiState.value =
+                    ProductUiState.Error(
+                        e.message ?: "Something went wrong"
+                    )
             }
         }
     }
