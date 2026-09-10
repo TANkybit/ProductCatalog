@@ -1,5 +1,6 @@
 package com.example.productcatalog
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -20,6 +21,7 @@ import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import com.example.productcatalog.viewmodel.ProductUiState
+import com.example.productcatalog.ui.productdetail.ProductDetailActivity
 
 class MainActivity : AppCompatActivity() {
     private val viewModel: ProductListViewModel by viewModels()
@@ -39,7 +41,21 @@ class MainActivity : AppCompatActivity() {
         val recyclerProducts =
             findViewById<RecyclerView>(R.id.recyclerProducts)
 
-        productAdapter = ProductAdapter(emptyList())
+        productAdapter = ProductAdapter(emptyList()) { product ->
+
+            val intent =
+                Intent(
+                    this,
+                    ProductDetailActivity::class.java
+                )
+
+            intent.putExtra(
+                "PRODUCT_ID",
+                product.id
+            )
+
+            startActivity(intent)
+        }
 
         recyclerProducts.layoutManager =
             LinearLayoutManager(this)

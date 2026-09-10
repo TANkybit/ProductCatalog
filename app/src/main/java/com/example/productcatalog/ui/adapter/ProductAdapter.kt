@@ -10,7 +10,7 @@ import com.example.productcatalog.data.model.Product
 import android.widget.ImageView
 import coil3.load
 
-class ProductAdapter (private var products: List<Product>) : RecyclerView.Adapter<ProductAdapter.ProductViewHolder>(){
+class ProductAdapter (private var products: List<Product>, private val onProductClick: (Product) -> Unit) : RecyclerView.Adapter<ProductAdapter.ProductViewHolder>(){
     class ProductViewHolder(itemView: View) :
         RecyclerView.ViewHolder(itemView) {
 
@@ -46,6 +46,9 @@ class ProductAdapter (private var products: List<Product>) : RecyclerView.Adapte
         holder.title.text = product.title
         holder.price.text = "$${product.price}"
         holder.image.load(product.thumbnail)
+        holder.itemView.setOnClickListener {
+            onProductClick(product)
+        }
     }
 
     override fun getItemCount(): Int {
